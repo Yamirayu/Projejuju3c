@@ -1,158 +1,164 @@
-
 body {
-    margin: 0;
-    overflow: hidden; /* Evita barras de rolagem */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background-color: #000; /* Fundo escuro */
-    font-family: sans-serif;
-    color: #eee;
-}
-/* No seu style.css */
-/* No seu style.css */
-
-/* ... (seus estilos para body, .game-screen, .wall, .player, etc.) ... */
-
-.end-point {
-    position: absolute; /* ESSENCIAL para posicionamento dentro do maze-walls */
-    background-color: rgb(255, 0, 0); /* Cor verde translúcida para destacar */
-    /* text-align: center; /* Opcional: para texto */
-    /* line-height: 40px; /* Opcional: se quiser centralizar texto verticalmente com TILE_SIZE */
-    color: white; /* Cor do texto, se houver */
-    font-weight: bold;
-    display: flex; /* Para centralizar conteúdo se houver */
-    justify-content: center;
-    align-items: center;
-    z-index: 10; /* Garante que ele apareça sobre o fundo do labirinto */
-    /* Width, Height, Top, Left serão definidos pelo JS com TILE_SIZE */
+    font-family: Arial, sans-serif;
+    background-color: #f2f2f2;
+    text-align: center;
+    padding: 30px;
 }
 
-#maze-level-1, #maze-level-2, #maze-level-3 {
-    background-image: url(01010azul.jpg); /* Fundo do labirinto */
-    position: relative; /* Importante para posicionar as paredes e o jogador */
+h1 {
+    color: #c7b4b4;
+}
+p{
+    color:WHITE;
+
+}
+#gameContainer {
+    background-color: #2d414a;
+    padding: 2%;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(248, 193, 193, 0.1);
+    display: inline-block;
+    margin-bottom: 20px;
 }
 
-.maze-walls {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    /* Opcional: background-image para uma textura */
+input[type="number"],
+input[type="text"] {
+    padding: 10px;
+    font-size: 16px;
+    width: 150px;
+    margin-bottom: 10px;
+    border-radius: 10PX;
 }
 
-.wall {
-    position: absolute; /* Cada parede será posicionada absolutamente */
-    background-image:url(010101.jpg); /* Cor das paredes */
-    /* Você pode adicionar uma borda ou sombra para dar mais profundidade */
-}
-
-.player {
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    background-color: rgb(0, 255, 255); /* Cor do jogador */
-    z-index: 30; /* Garante que o jogador fique acima das paredes */
-    transition: top 0.05s linear, left 0.05s linear; /* Para movimento suave */
-}
-
-#game-container {
-    position: relative;
-    width: 800px; /* Largura do seu jogo */
-    height: 600px; /* Altura do seu jogo */
-    border: 2px solid #555;
-    background-color:url(01010azul.jpg);
-    overflow: hidden; /* Para garantir que as paredes do labirinto fiquem dentro */
-}
-
-.game-screen {
-    position: relative;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: none; /* Ajustado para evitar sobreposição antes de ativar */
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    background-color: rgba(0, 0, 0, 0.9);
-    z-index: 10;
-    transition: opacity 0.5s ease-in-out;
-}
-
-.game-screen.active {
-    display: flex; /* Agora aparece quando ativo */
-    opacity: 1;
-    pointer-events: auto; /* Agora pode ser clicado */
-    z-index: 20; /* Garante que aparece sobre outras telas */
-}
-
-/* Estilos do Labirinto */
-#maze-level-1, #maze-level-2, #maze-level-3 {
-    position: relative;
-    width: 800px;
-    height: 600px;
-    display: none; /* Esconde as fases antes da ativação */
-}
-
-#maze-level-1.active, #maze-level-2.active, #maze-level-3.active {
-    display: block; /* Garante que a fase ativa aparece */
-}
-
-.player {
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    background-color: rgb(238, 255, 0); /* Cor do jogador */
-    z-index: 30;
-    transition: top 0.05s linear, left 0.05s linear; /* Para movimento suave */
-}
-
-/* Estilos do Jumpscare */
-#jumpscare-screen {
-    background-color: #000;
-    z-index: 100; /* Garante que fique por cima de tudo */
-}
-
-#jumpscare-image {
-    width: 100%;
-    height: 100%;
-    object-fit: contain; /* Ou cover, dependendo da sua imagem */
-}
-
-/* Estilos do Jogo dos Copos */
-#cup-game-screen {
-    background-color: #1a1a1a;
-}
-
-.cups-container {
-    display: flex;
-    gap: 30px;
-    margin-top: 50px;
-}
-
-.cup {
-    width: 100px;
-    height: 120px;
-    background-color: #663300; /* Cor do copo */
-    border-radius: 0 0 50px 50px; /* Formato de copo */
-    border: 2px solid #996633;
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    margin: 5px;
     cursor: pointer;
-    position: relative; /* Para posicionar a bola */
-    transition: transform 0.3s ease-in-out;
 }
 
-.ball {
-    width: 30px;
-    height: 30px;
-    background-color: gold;
-    border-radius: 50%;
+#message,
+#attempts {
+    margin-top: 10px;
+    font-size: 18px;
+    color: #ffffff;
+}
+
+#ranking {
+    margin-top: 30px;
+    text-align: left;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#ranking h2 {
+    text-align: center;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+li {
+    padding: 5px 0;
+    border-bottom: 1px solid #ccc;
+}
+
+
+.light-mode {
+    transition: ease 0.5s;
+    background: linear-gradient(90deg, rgba(41, 28, 184, 1) 4%, rgba(22, 76, 201, 1) 26%, rgba(96, 158, 232, 1) 56%, rgba(105, 174, 240, 1) 98%);
+    color: black;
+}
+
+.dark-mode {
+    transition: ease 0.5s;
+    background: linear-gradient(90deg, rgb(62, 61, 61) 8%, rgb(23, 23, 109) 100%, rgb(8, 10, 107) 80%);
+    color: #fff;
+}
+
+
+.toggle-container {
+    position: relative;
+    width: 80px;
+    height: 40px;
     position: absolute;
-    bottom: 10px; /* Ajuste para aparecer sob o copo */
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 5; /* Fica abaixo do copo visualmente */
+    /* Permite posicionamento absoluto na tela */
+    top: 0;
+    /* Alinha no topo */
+    left: 0;
+    /* Alinha à esquerda */
+
+
 }
 
+.toggle-input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 40px;
+    transition: .4s;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.light-mode .toggle-slider {
+    background: #7ec4f0;
+    transition: ease 1.5s;
+}
+
+.dark-mode .toggle-slider {
+    transition: ease 0.5s;
+    background: #0f1c2e;
+}
+
+.toggle-slider:before {
+    content: "";
+    position: absolute;
+    height: 30px;
+    width: 30px;
+    left: 5px;
+    bottom: 5px;
+    border-radius: 50%;
+    transition: .4s;
+    z-index: 2;
+}
+
+.light-mode .toggle-slider:before {
+    background: #FFEB3B;
+    box-shadow: 0 0 15px rgba(255, 193, 7, 0.6);
+}
+
+.dark-mode .toggle-slider:before {
+    background: #f5f5f5;
+    transform: translateX(40px);
+    box-shadow: 0 0 10px rgba(176, 190, 197, 0.6);
+}
+
+#botaoApagarRanking {
+    position: fixed;
+    bottom: 10px;
+    left: 40px;
+    background:transparent;
+    border: none;
+    font-size: 40px;
+    cursor: pointer;
+    opacity: 0.3;
+    transition: opacity 0.3s;
+  }
+  
+  #botaoApagarRanking:hover {
+    opacity: 1;
+  }
+  
