@@ -1,3 +1,5 @@
+
+
 document.addEventListener("DOMContentLoaded", () => {
     const div = document.body;
     const toggleSwitch = document.getElementById("themeToggle");
@@ -29,19 +31,36 @@ document.addEventListener("DOMContentLoaded", () => {
     // Carrega ranking salvo
     loadRanking();
 });
-
+let baseDuration = 45; // duração padrão do jogo
+let startTime;
+let speedMultiplier = 1;
 let secretNumber;
 let attempts;
+let timerInterval;
+let alertPlayed = false;
 let currentPlayer = "";
 let ranking = [];
-
 function startGame() {
-    const startSound = document.getElementById('startSound');
-    startSound.play(); // 🎬 toca som de início
+    alertPlayed = false;
+    speedMultiplier = 1;
+    timeLeft = baseDuration;
+    clearInterval(timerInterval);
+    startTime = Date.now();
+    const now = Date.now();
+    const elapsed = (now - startTime) / 1000;
+    const adjustedElapsed = elapsed * speedMultiplier;
+
+    // ⚠️ Protege os últimos 10 segundos contra aceleração
+    let effectiveMultiplier = speedMultiplier;
+    if (baseDuration - adjustedElapsed <= 10) {
+        effectiveMultiplier = 1;
+    }
+
+    const finalElapsed = elapsed * effectiveMultiplier;
+    const remaining = Math.max(0, Math.ceil(baseDuration - finalElapsed));
 
     const nameInput = document.getElementById('playerName');
     const name = nameInput.value.trim();
-
     if (name === "") {
         alert("Digite um nome válido.");
         return;
@@ -57,6 +76,30 @@ function startGame() {
     document.getElementById('message').textContent = '';
     document.getElementById('attempts').textContent = '';
     document.getElementById('guessInput').value = '';
+    document.getElementById('timeLeft').textContent = baseDuration;
+
+    document.getElementById('startSound').play();
+
+    timerInterval = setInterval(() => {
+        const now = Date.now();
+        const elapsed = (now - startTime) / 1000;
+        const adjustedElapsed = elapsed * speedMultiplier;
+        const remaining = Math.max(0, Math.ceil(baseDuration - adjustedElapsed));
+        timeLeft = remaining;
+        document.getElementById('timeLeft').textContent = timeLeft;
+
+        if (timeLeft === 10 && !alertPlayed) {
+            document.getElementById('alertSound').play();
+            alertPlayed = true;
+        }
+
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            document.getElementById('gameSection').style.display = 'none';
+            document.getElementById('endSection').style.display = 'block';
+            document.getElementById('endMessage').innerHTML = `⏰ Tempo esgotado! O número era <strong>${secretNumber}</strong>.`;
+        }
+    }, 250); // Atualiza 4x por segundo
 }
 
 function checkGuess() {
@@ -75,47 +118,56 @@ function checkGuess() {
 
     const diff = Math.abs(secretNumber - guess);
 
+    // 🔥 Atualiza o multiplicador de velocidade
+    if (diff <= 5) {
+        speedMultiplier = 1;
+    } else if (diff <= 1) {
+        speedMultiplier = 1;
+    } else if (diff <= 30) {
+        speedMultiplier = 1;
+    } else {
+        speedMultiplier = 1;
+    }
+
     if (guess === secretNumber) {
-        message.textContent = "";
-        attemptsDisplay.textContent = "";
+        clearInterval(timerInterval);
+        winSound.play();
 
         document.getElementById('gameSection').style.display = 'none';
         document.getElementById('endSection').style.display = 'block';
         document.getElementById('endMessage').innerHTML = `🎉 <strong>${currentPlayer}</strong>, você acertou o número <strong>${secretNumber}</strong> em <strong>${attempts}</strong> tentativa(s)!`;
+        document.getElementById('guessInput').value = '';
+        attemptsDisplay.textContent = `Tentativas: ${attempts}`;
+        message.textContent = '';
 
+        // ⏱️ tempo restante já está em timeLeft
         let playerData = ranking.find(p => p.name === currentPlayer);
+
         if (playerData) {
             playerData.gamesPlayed += 1;
+            const isBetterScore = attempts < playerData.bestScore;
+            const isSameScoreBetterTime = attempts === playerData.bestScore && timeLeft > playerData.bestTime;
 
-            // Atualiza melhor tentativa
-            if (attempts < playerData.bestScore) {
+            if (isBetterScore || isSameScoreBetterTime) {
                 playerData.bestScore = attempts;
+                playerData.bestTime = timeLeft;
             }
 
-            // Atualiza pior tentativa
-            if (playerData.worstScore === undefined || attempts > playerData.worstScore) {
+            if (!playerData.worstScore || attempts > playerData.worstScore) {
                 playerData.worstScore = attempts;
             }
-
         } else {
             ranking.push({
                 name: currentPlayer,
                 bestScore: attempts,
+                bestTime: timeLeft,
                 worstScore: attempts,
                 gamesPlayed: 1
             });
         }
 
         updateRanking();
-
-        confetti({
-            particleCount: 150,
-            spread: 70,
-            origin: { y: 0.6 }
-        });
-
-        winSound.play();
-
+        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
     } else {
         errorSound.play();
 
@@ -132,11 +184,17 @@ function checkGuess() {
 
         message.innerHTML = `${guess < secretNumber ? "🔼 Tente um número maior." : "🔽 Tente um número menor."} <br><span style='color:blue;'>${hint}</span>`;
         attemptsDisplay.textContent = `Tentativas: ${attempts}`;
+        document.getElementById('guessInput').value = '';
     }
 }
 
-
 function playAgainSame() {
+    clearInterval(timerInterval);
+    alertPlayed = false;
+    speedMultiplier = 1;
+    timeLeft = baseDuration;
+    startTime = Date.now(); // 🔄 reinicia contagem
+
     secretNumber = Math.floor(Math.random() * 100) + 1;
     attempts = 0;
 
@@ -145,13 +203,29 @@ function playAgainSame() {
     document.getElementById('message').textContent = '';
     document.getElementById('attempts').textContent = '';
     document.getElementById('guessInput').value = '';
-}
+    document.getElementById('timeLeft').textContent = baseDuration;
 
-function playAgainNew() {
-    document.getElementById('nameSection').style.display = 'block';
-    document.getElementById('gameSection').style.display = 'none';
-    document.getElementById('endSection').style.display = 'none';
-    document.getElementById('playerName').value = '';
+    // ⏱️ Reinicia o cronômetro principal
+    timerInterval = setInterval(() => {
+        const now = Date.now();
+        const elapsed = (now - startTime) / 1000;
+        const adjustedElapsed = elapsed * speedMultiplier;
+        const remaining = Math.max(0, Math.ceil(baseDuration - adjustedElapsed));
+        timeLeft = remaining;
+        document.getElementById('timeLeft').textContent = timeLeft;
+
+        if (timeLeft === 10 && !alertPlayed) {
+            document.getElementById('alertSound').play();
+            alertPlayed = true;
+        }
+
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            document.getElementById('gameSection').style.display = 'none';
+            document.getElementById('endSection').style.display = 'block';
+            document.getElementById('endMessage').innerHTML = `⏰ Tempo esgotado! O número era <strong>${secretNumber}</strong>.`;
+        }
+    }, 250);
 }
 
 function updateRanking() {
@@ -160,18 +234,26 @@ function updateRanking() {
     const list = document.getElementById('rankingList');
     list.innerHTML = "";
 
-    ranking.sort((a, b) => a.bestScore - b.bestScore);
+    ranking.sort((a, b) => {
+        if (a.bestScore !== b.bestScore) {
+            return a.bestScore - b.bestScore;
+        } else {
+            return b.bestTime - a.bestTime; // maior tempo restante vence
+        }
+    });
 
     ranking.forEach((entry, index) => {
         if (entry.name.trim() !== "") {
-            const worst = entry.worstScore ?? "–"; // usa "–" se o campo estiver indefinido
+            const worst = entry.worstScore ?? "–";
+            const time = entry.bestTime ?? "–";
             const li = document.createElement('li');
             li.innerHTML = `
-                ${index + 1}. <strong>${entry.name}</strong><br>
-                🏅 Melhor: ${entry.bestScore} tentativa(s)<br>
-                😬 Pior: ${worst} tentativa(s)<br>
-                🎮 Partidas: ${entry.gamesPlayed}
-            `;
+    ${index + 1}. <strong>${entry.name}</strong><br>
+    🏅 Melhor: ${entry.bestScore} tentativa(s)<br>
+    ⏱️ Tempo restante: ${time}s<br>
+    😬 Pior: ${worst} tentativa(s)<br>
+    🎮 Partidas: ${entry.gamesPlayed}
+`;
             list.appendChild(li);
         }
     });
@@ -264,4 +346,6 @@ function apagarRanking() {
         updateRanking();
     }
 }
-
+document.getElementById('guessInput').addEventListener('input', () => {
+    document.getElementById('message').textContent = '';
+});
