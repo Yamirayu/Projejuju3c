@@ -83,17 +83,25 @@ function checkGuess() {
         document.getElementById('endSection').style.display = 'block';
         document.getElementById('endMessage').innerHTML = `🎉 <strong>${currentPlayer}</strong>, você acertou o número <strong>${secretNumber}</strong> em <strong>${attempts}</strong> tentativa(s)!`;
 
-        // Atualiza ou adiciona jogador no ranking
         let playerData = ranking.find(p => p.name === currentPlayer);
         if (playerData) {
             playerData.gamesPlayed += 1;
+
+            // Atualiza melhor tentativa
             if (attempts < playerData.bestScore) {
                 playerData.bestScore = attempts;
             }
+
+            // Atualiza pior tentativa
+            if (playerData.worstScore === undefined || attempts > playerData.worstScore) {
+                playerData.worstScore = attempts;
+            }
+
         } else {
             ranking.push({
                 name: currentPlayer,
                 bestScore: attempts,
+                worstScore: attempts,
                 gamesPlayed: 1
             });
         }
@@ -106,10 +114,10 @@ function checkGuess() {
             origin: { y: 0.6 }
         });
 
-        winSound.play(); // ✅ toca som de vitória
+        winSound.play();
 
     } else {
-        errorSound.play(); // ❌ toca som de erro
+        errorSound.play();
 
         let hint = "";
         if (diff <= 5) {
@@ -126,6 +134,7 @@ function checkGuess() {
         attemptsDisplay.textContent = `Tentativas: ${attempts}`;
     }
 }
+
 
 function playAgainSame() {
     secretNumber = Math.floor(Math.random() * 100) + 1;
@@ -155,29 +164,43 @@ function updateRanking() {
 
     ranking.forEach((entry, index) => {
         if (entry.name.trim() !== "") {
+            const worst = entry.worstScore ?? "–"; // usa "–" se o campo estiver indefinido
             const li = document.createElement('li');
             li.innerHTML = `
-          ${index + 1}. <strong>${entry.name}</strong><br>
-          🏅 Melhor: ${entry.bestScore} tentativa(s)<br>
-          😬 Pior: ${entry.worstScore} tentativa(s)<br>
-          🎮 Partidas: ${entry.gamesPlayed}
-        `;
+                ${index + 1}. <strong>${entry.name}</strong><br>
+                🏅 Melhor: ${entry.bestScore} tentativa(s)<br>
+                😬 Pior: ${worst} tentativa(s)<br>
+                🎮 Partidas: ${entry.gamesPlayed}
+            `;
             list.appendChild(li);
         }
     });
 }
-
 function loadRanking() {
     const saved = localStorage.getItem("ranking");
     if (saved) {
-        ranking = JSON.parse(saved);
+        ranking = JSON.parse(saved).map(player => {
+            // Garante que bestScore está correto
+            if (!player.bestScore || typeof player.bestScore !== "number") {
+                player.bestScore = Infinity;
+            }
+
+            // Corrige worstScore se estiver ausente ou inválido
+            if (
+                player.worstScore === undefined ||
+                player.worstScore === null ||
+                typeof player.worstScore !== "number"
+            ) {
+                player.worstScore = player.bestScore; // assume o bestScore como pior
+            }
+
+            return player;
+        });
     } else {
         ranking = [];
     }
 
-    // Remove jogadores sem nome
     ranking = ranking.filter(player => player.name.trim() !== "");
-
     updateRanking();
 }
 
@@ -203,42 +226,42 @@ document.addEventListener('keydown', function (event) {
 });
 function adicionarAoRanking(nome, pontuacao) {
     if (
-      typeof nome !== "string" ||
-      nome.trim() === "" ||
-      typeof pontuacao !== "number" ||
-      isNaN(pontuacao) ||
-      pontuacao <= 0
+        typeof nome !== "string" ||
+        nome.trim() === "" ||
+        typeof pontuacao !== "number" ||
+        isNaN(pontuacao) ||
+        pontuacao <= 0
     ) {
-      alert("Nome ou pontuação inválida.");
-      return;
+        alert("Nome ou pontuação inválida.");
+        return;
     }
-  
+
     nome = nome.trim().toLowerCase();
-  
+
     let jogadorExistente = ranking.find(p => p.name === nome);
-  
+
     if (jogadorExistente) {
-      alert("Este nome já está no ranking. Use um nome diferente.");
-      return;
+        alert("Este nome já está no ranking. Use um nome diferente.");
+        return;
     }
-  
+
     // ✅ Cria novo jogador com pontuação atual
     ranking.push({
-      name: nome,
-      bestScore: pontuacao,
-      worstScore: pontuacao,
-      gamesPlayed: 1
+        name: nome,
+        bestScore: pontuacao,
+        worstScore: pontuacao,
+        gamesPlayed: 1
     });
-  
+
     localStorage.setItem("ranking", JSON.stringify(ranking));
     updateRanking();
-  }
+}
 
-  function apagarRanking() {
+function apagarRanking() {
     if (confirm("Tem certeza que deseja apagar todo o ranking?")) {
-      localStorage.removeItem("ranking");
-      ranking = [];
-      updateRanking();
+        localStorage.removeItem("ranking");
+        ranking = [];
+        updateRanking();
     }
-  }
-  
+}
+
