@@ -25,14 +25,16 @@
   <div class="gameContainer" id="gameContainer">
     <div class="nameSection" id="nameSection">
       <p>Digite seu nome:</p>
-      <br>
+      
       <input class="nome" type="text" id="playerName" placeholder="Seu nome">
       <br>
-      <br>
+      
       <button onclick="startGame()">Começar</button>
     </div>
 
     <div id="gameSection" style="display:none;">
+      <p id="timer">⏱️ Tempo restante: <span id="timeLeft">45</span>s</p>
+      <audio id="alertSound" src="alert.mp3"></audio>
       <p>Escolha um número entre <strong>1 e 100</strong></p>
       <input type="number" id="guessInput" min="1" max="100">
       <button onclick="checkGuess()">Tentar</button>
@@ -55,7 +57,7 @@
   <body class="light-mode">
     <br>
     <!-- Botão para alternar entre tema claro e escuro -->
-     
+
     <label class="toggle-container">
       <input type="checkbox" class="toggle-input" id="themeToggle">
       <div class="toggle-slider">
