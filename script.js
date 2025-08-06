@@ -1,5 +1,3 @@
-
-
 document.addEventListener("DOMContentLoaded", () => {
     const div = document.body;
     const toggleSwitch = document.getElementById("themeToggle");
@@ -204,7 +202,6 @@ function playAgainSame() {
     document.getElementById('attempts').textContent = '';
     document.getElementById('guessInput').value = '';
     document.getElementById('timeLeft').textContent = baseDuration;
-
     // ⏱️ Reinicia o cronômetro principal
     timerInterval = setInterval(() => {
         const now = Date.now();
@@ -226,7 +223,16 @@ function playAgainSame() {
             document.getElementById('endMessage').innerHTML = `⏰ Tempo esgotado! O número era <strong>${secretNumber}</strong>.`;
         }
     }, 250);
+
 }
+function playAgainNew() {
+    document.getElementById('nameSection').style.display = 'block';
+    document.getElementById('gameSection').style.display = 'none';
+    document.getElementById('endSection').style.display = 'none';
+    document.getElementById('playerName').value = '';
+}
+
+
 
 function updateRanking() {
     localStorage.setItem("ranking", JSON.stringify(ranking));
